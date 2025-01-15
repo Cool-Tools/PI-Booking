@@ -10,64 +10,100 @@
 
 @if (_bookings.Count > 0)
 {
-    <table class="table-responsive-lg">
-        <thead>
-        <tr>
-            <td>Reference</td>
-            <td>Check In</td>
-            <td>Check Out</td>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var booking in _bookings)
-        {
-            <tr>
-                <td>@booking.Reference</td>
-                <td>@booking.StartDate.ToShortDateString()</td>
-                <td>@booking.EndDate.ToShortDateString()</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+	<table class="table table-bordered table-hover">
+		<thead class="thead-light">
+			<tr>
+				<th scope="col">Reference</th>
+				<th scope="col">Check In</th>
+				<th scope="col">Check Out</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var booking in _bookings)
+			{
+				<tr>
+					<th scope="row">@booking.Reference</th>
+					<td>@booking.StartDate.ToShortDateString()</td>
+					<td>@booking.EndDate.ToShortDateString()</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 }
+<div class="form-row">
+	<div class="form-group col-md-4">
+		<label for="reference">Booking Reference</label>
+		<input type="text" @bind-value="_reference" id="reference" placeholder="Enter booking reference" class="form-control mb-2" />
+	</div>
+	<div class="form-group col-md-4">
+		<label for="checkin">Check In</label>
+		<InputDate @bind-Value="_checkIn" id="checkin" @onchange="ValidateDate" class="form-control mb-2" />
+	</div>
+	<div class="form-group col-md-4">
+		<label for="checkout">Check Out</label>
+		<InputDate @bind-Value="_checkOut" id="checkout" class="form-control mb-2" />
+	</div>
+	<div class="col">
+		<button @onclick="AddBooking" class="btn btn-success mb-2">Submit</button>
+	</div>
+</div>
+
 <div class="input-group">
-    <div class="col-sm-6">
-        <label class="mb-3">QR Code Text</label>
-        <input type="text" @bind-value="QrCodeText" placeholder="Enter your text" class="form-control mb-4" />
-        <button @onclick="GenerateQrCode" class="btn btn-success">Generate QR Code</button>
-    </div>
+	<div class="col-sm-6">
+		<label class="mb-3">QR Code Text</label>
+		<input type="text" @bind-value="QrCodeText" placeholder="Enter your text" class="form-control mb-4" />
+		<button @onclick="GenerateQrCode" class="btn btn-success">Generate QR Code</button>
+	</div>
 </div>
 
 
 <img alt ="" src="@_qrByte" width="300" class="mb-5" />
 
 @code {
-    private string? QrCodeText { get; set; }
-    private string _qrByte = "";
-    private List<Booking> _bookings = new List<Booking>();
+	private string? QrCodeText { get; set; }
+	private string _qrByte = "";
+	private List<Booking> _bookings = new List<Booking>();
+	private string _reference = "";
+	private DateTime _checkIn = DateTime.Today;
+	private DateTime _checkOut = DateTime.Today.AddDays(1);
 
-    protected override void OnInitialized()
-    {
-        _bookings.Add( new Booking() { Reference = "BAF0145566", StartDate = DateTime.Parse("15/01/2025")});
-        _bookings.Add( new Booking() { Reference = "BAF6479195", StartDate = DateTime.Parse("22/01/2025")});
-        _bookings.Add( new Booking() { Reference = "BAF4241388", StartDate = DateTime.Parse("29/01/2025")});
-        QrCodeText = "BAF0145566:Karanika.png";
-        base.OnInitialized();
-    }
+	protected override void OnInitialized()
+	{
+		_bookings.Add( new Booking() { Reference = "BAF0145566", StartDate = DateTime.Parse("15/01/2025")});
+		_bookings.Add( new Booking() { Reference = "BAF6479195", StartDate = DateTime.Parse("22/01/2025")});
+		_bookings.Add( new Booking() { Reference = "BAF4241388", StartDate = DateTime.Parse("29/01/2025")});
+		QrCodeText = "BAF0145566:Karanika.png";
+		base.OnInitialized();
+	}
 
-    private void GenerateQrCode()
-    {
-        if (!string.IsNullOrEmpty(QrCodeText))
-        {
-            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
-            using (QRCodeData qrCodeData = qrGenerator.CreateQrCode(QrCodeText, QRCodeGenerator.ECCLevel.Q))
-            using (QRCode qrCode = new QRCode(qrCodeData))
-            {
-                PngByteQRCode pngByteQrCode = new PngByteQRCode(qrCodeData);
-                var base64EncodedQrCode = Convert.ToBase64String(pngByteQrCode.GetGraphic(10));
-                _qrByte = $"data:image/png;base64,{base64EncodedQrCode}";
-            }
-            
-        }
-    }
+	private void GenerateQrCode()
+	{
+		if (!string.IsNullOrEmpty(QrCodeText))
+		{
+			using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+			using (QRCodeData qrCodeData = qrGenerator.CreateQrCode(QrCodeText, QRCodeGenerator.ECCLevel.Q))
+			using (QRCode qrCode = new QRCode(qrCodeData))
+			{
+				PngByteQRCode pngByteQrCode = new PngByteQRCode(qrCodeData);
+				var base64EncodedQrCode = Convert.ToBase64String(pngByteQrCode.GetGraphic(10));
+				_qrByte = $"data:image/png;base64,{base64EncodedQrCode}";
+			}
+
+		}
+	}
+	private void ValidateDate(ChangeEventArgs e)
+	{
+		if (_checkIn > _checkOut)
+			_checkOut = _checkIn.AddDays(1);
+	}
+	private void AddBooking(MouseEventArgs e)
+	{
+		var newBooking = new Booking
+		{
+			Reference = _reference,
+			StartDate = _checkIn,
+			EndDate = _checkOut
+		};
+		_bookings.Add(newBooking);
+	}
 }
