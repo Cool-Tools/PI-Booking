@@ -11,9 +11,12 @@
 @if (_bookings.Count > 0)
 {
 	<table class="table table-bordered table-hover">
-		<thead class="thead-light">
+		<thead class="table-dark">
 			<tr>
-				<th scope="col">Reference</th>
+				<th scope="col"  
+				    data-editable="true"
+				    data-editable-type="text"
+				    data-editable-mode="inline">Reference</th>
 				<th scope="col">Check In</th>
 				<th scope="col">Check Out</th>
 			</tr>
@@ -23,28 +26,29 @@
 			{
 				<tr>
 					<th scope="row">@booking.Reference</th>
-					<td>@booking.StartDate.ToShortDateString()</td>
-					<td>@booking.EndDate.ToShortDateString()</td>
+					<td>@booking.CheckInDate.ToShortDateString()</td>
+					<td>@booking.CheckOutDate.ToShortDateString()</td>
 				</tr>
 			}
 		</tbody>
 	</table>
 }
-<div class="form-row">
-	<div class="form-group col-md-4">
+
+<div class="row g-3">
+	<div class="col-sm-5">
 		<label for="reference">Booking Reference</label>
 		<input type="text" @bind-value="_reference" id="reference" placeholder="Enter booking reference" class="form-control mb-2" />
 	</div>
-	<div class="form-group col-md-4">
+	<div class="col-sm">
 		<label for="checkin">Check In</label>
 		<InputDate @bind-Value="_checkIn" id="checkin" @onchange="ValidateDate" class="form-control mb-2" />
 	</div>
-	<div class="form-group col-md-4">
+	<div class="col-sm">
 		<label for="checkout">Check Out</label>
 		<InputDate @bind-Value="_checkOut" id="checkout" class="form-control mb-2" />
 	</div>
-	<div class="col">
-		<button @onclick="AddBooking" class="btn btn-success mb-2">Submit</button>
+	<div class="col-sm">
+		<button @onclick="AddBooking" class="btn btn-success mb-2">Add</button>
 	</div>
 </div>
 
@@ -69,9 +73,9 @@
 
 	protected override void OnInitialized()
 	{
-		_bookings.Add( new Booking() { Reference = "BAF0145566", StartDate = DateTime.Parse("15/01/2025")});
-		_bookings.Add( new Booking() { Reference = "BAF6479195", StartDate = DateTime.Parse("22/01/2025")});
-		_bookings.Add( new Booking() { Reference = "BAF4241388", StartDate = DateTime.Parse("29/01/2025")});
+		_bookings.Add( new Booking() { Reference = "BAF0145566", CheckInDate = DateTime.Parse("15/01/2025"), CheckOutDate = DateTime.Parse("16/01/2025")});
+		_bookings.Add( new Booking() { Reference = "BAF6479195", CheckInDate = DateTime.Parse("22/01/2025"), CheckOutDate = DateTime.Parse("23/01/2025")});
+		_bookings.Add( new Booking() { Reference = "BAF4241388", CheckInDate = DateTime.Parse("29/01/2025"), CheckOutDate = DateTime.Parse("30/01/2025")});
 		QrCodeText = "BAF0145566:Karanika.png";
 		base.OnInitialized();
 	}
@@ -101,8 +105,8 @@
 		var newBooking = new Booking
 		{
 			Reference = _reference,
-			StartDate = _checkIn,
-			EndDate = _checkOut
+			CheckInDate = _checkIn,
+			CheckOutDate = _checkOut
 		};
 		_bookings.Add(newBooking);
 	}
